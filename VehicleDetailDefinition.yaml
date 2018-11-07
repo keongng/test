@@ -2,11 +2,11 @@ swagger: '2.0'
 info:
   version: v1
   title: VEST.Web
-host: vdzvx.apac.bg.corpintra.net
+host: api-ap-int.apac.corpinter.net/int
 schemes:
-  - http
+  - https
 paths:
-  /rest/v1/VehicleDetailApi:
+  /vx/v1/vehicledetailapi:
     get:
       tags:
         - VehicleDetailApi
