@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   version: v1
-  title: VEST.Web
+  title: VX Vehicle Services
 host: api-ap-int.apac.corpinter.net/int
 schemes:
   - https
