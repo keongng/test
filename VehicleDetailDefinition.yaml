@@ -1,0 +1,139 @@
+swagger: '2.0'
+info:
+  version: v1
+  title: VEST.Web
+host: vdzvx.apac.bg.corpintra.net
+schemes:
+  - http
+paths:
+  /rest/v1/VehicleDetailApi:
+    get:
+      tags:
+        - VehicleDetailApi
+      summary: Get Vehicle details by Commission Number for country
+      operationId: VehicleDetailApi_Get
+      consumes: []
+      produces:
+        - application/json
+        - text/json
+        - application/xml
+        - text/xml
+        - text/html
+      parameters:
+        - name: country
+          in: query
+          description: ''
+          required: true
+          type: string
+        - name: commissionNo
+          in: query
+          description: ''
+          required: true
+          type: string
+        - name: Authorization
+          in: header
+          description: access token
+          required: false
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/JsonResultVm[VehicleDetailDto]'
+definitions:
+  'JsonResultVm[VehicleDetailDto]':
+    type: object
+    properties:
+      Success:
+        type: boolean
+      Message:
+        type: string
+      StatusCode:
+        format: int32
+        enum:
+          - 100
+          - 101
+          - 200
+          - 201
+          - 202
+          - 203
+          - 204
+          - 205
+          - 206
+          - 300
+          - 300
+          - 301
+          - 301
+          - 302
+          - 302
+          - 303
+          - 303
+          - 304
+          - 305
+          - 306
+          - 307
+          - 307
+          - 400
+          - 401
+          - 402
+          - 403
+          - 404
+          - 405
+          - 406
+          - 407
+          - 408
+          - 409
+          - 410
+          - 411
+          - 412
+          - 413
+          - 414
+          - 415
+          - 416
+          - 417
+          - 426
+          - 500
+          - 501
+          - 502
+          - 503
+          - 504
+          - 505
+        type: integer
+      Data:
+        $ref: '#/definitions/VehicleDetailDto'
+  VehicleDetailDto:
+    type: object
+    properties:
+      VinNo:
+        type: string
+      Division:
+        type: string
+      Variant:
+        type: string
+      ModelName:
+        type: string
+      ModelType:
+        type: string
+      ModelRange:
+        type: string
+      Handle:
+        type: string
+      VehicleTotalPrice:
+        format: double
+        type: number
+      VehicleOptions:
+        type: array
+        items:
+          $ref: '#/definitions/VehicleDetailOptionDto'
+  VehicleDetailOptionDto:
+    type: object
+    properties:
+      Code:
+        type: string
+      Price:
+        format: double
+        type: number
+      Description:
+        type: string
+      OptionClass:
+        type: string
