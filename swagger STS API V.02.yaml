@@ -1,0 +1,1450 @@
+swagger: '2.0'
+info:
+  description: STS - Sales Transaction Microservice
+  version: 1.0.0
+  title: Sales Transaction APIs
+  contact:
+    email: priyadharshini.nehru@daimler.com
+host: virtserver.swaggerhub.com
+basePath: /S459/STS/1.0.0
+schemes:
+  - https
+paths:
+  /salestxn:
+    get:
+      tags:
+        - sales transaction
+      summary: Retrieves sales transactions in STS for a particular customer
+      description: >
+        By passing in the appropriate options, you can retreive the sales
+        transactions of a particular customer 
+      operationId: RetreiveSalesTransactionsForCustomer
+      produces:
+        - application/json
+      parameters:
+        - name: custId
+          in: query
+          description: pass the customerId to get the sales txns
+          required: true
+          type: string
+        - name: skip
+          in: query
+          description: number of records to skip for pagination
+          required: false
+          type: integer
+          minimum: 0
+          format: int32
+        - name: limit
+          in: query
+          description: maximum number of records to return
+          required: false
+          type: integer
+          maximum: 50
+          minimum: 0
+          format: int32
+      responses:
+        '200':
+          description: search results retrieved
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/SalesTxnResponseDto'
+        '400':
+          description: bad input parameter
+        '401':
+          description: X-Auth-Key is not specified or incorrect
+        '403':
+          description: No access to the object
+      security:
+        - ApiKeyAuth: []
+    post:
+      tags:
+        - sales transaction
+      summary: Creates a new sales transaction/sales query in STS
+      description: |
+        Creates a new sales txn in STS
+      operationId: CreateSalesTransaction
+      consumes:
+        - application/json
+        - application/xml
+      produces:
+        - application/json
+        - application/xml
+      parameters:
+        - name: getSimilarVehicle
+          in: query
+          description: >-
+            pass an optional 'true/false' flag to retrieve the vehicle info if
+            the currently searched vehicle is unavailable
+          required: false
+          type: boolean
+          default: false
+        - in: body
+          name: salesTxnReq
+          description: sales transaction to be created in STS
+          required: true
+          schema:
+            $ref: '#/definitions/SalesTxnReqDto'
+      responses:
+        '201':
+          description: sales transaction item created
+          schema:
+            allOf:
+              - $ref: '#/definitions/SalesTxnResponseDto'
+              - {}
+        '400':
+          description: bad input parameter
+        '401':
+          description: X-Auth-Key is not specified or incorrect
+        '403':
+          description: No access to the object
+      security:
+        - ApiKeyAuth: []
+  '/salestxn/{stId}':
+    get:
+      tags:
+        - sales transaction
+      summary: Retrieves sales transactions in STS for a sales transaction id
+      description: |
+        By passing the stId, you can retreive a specific sales transaction
+      operationId: RetreiveSalesTransactionByStId
+      produces:
+        - application/json
+      parameters:
+        - name: stId
+          in: path
+          description: pass the stId to get the sales txn
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: sales transaction for the stId retreived
+          schema:
+            $ref: '#/definitions/SalesTxnResponseDto'
+        '400':
+          description: bad input parameter
+        '401':
+          description: X-Auth-Key is not specified or incorrect
+        '403':
+          description: No access to the object
+        '500':
+          description: Internal server error
+      security:
+        - ApiKeyAuth: []
+    delete:
+      tags:
+        - sales transaction
+      summary: >-
+        cancels a sales transactions in STS for a sales transaction id,by
+        updating the sales txn status
+      description: |
+        By passing the stId, you can cancel a specific sales transaction
+      operationId: CancelSalesTransaction
+      produces:
+        - application/json
+      parameters:
+        - name: stId
+          in: path
+          description: pass the stId to get the sales txn
+          required: true
+          type: integer
+        - name: custId
+          in: query
+          description: CustomerId
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: sales transaction cancelled
+          schema:
+            $ref: '#/definitions/SalesTxnSimpleResponseDto'
+        '400':
+          description: bad input parameter
+        '401':
+          description: X-Auth-Key is not specified or incorrect
+        '403':
+          description: No access to the object
+        '500':
+          description: Internal server error
+      security:
+        - ApiKeyAuth: []
+  '/salestxn/{stId}/quote':
+    post:
+      tags:
+        - quote
+      summary: Creates a new quote in STS for the sales transaction
+      description: |
+        Creates a quote for a sales txn in STS
+      operationId: StartQuoteForSalesTransaction
+      consumes:
+        - application/json
+        - application/xml
+      produces:
+        - application/json
+        - application/xml
+      parameters:
+        - name: stId
+          in: path
+          description: sales transaction Id
+          required: true
+          type: integer
+        - in: body
+          name: quoteReq
+          description: >-
+            quote request to be passed from salestouch web to create a quote for
+            a sales txn in STS
+          required: true
+          schema:
+            $ref: '#/definitions/QuoteReqDto'
+      responses:
+        '201':
+          description: item created
+          schema:
+            allOf:
+              - $ref: '#/definitions/QuoteResponseDto'
+              - {}
+        '400':
+          description: bad input parameter
+        '401':
+          description: X-Auth-Key is not specified or incorrect
+        '403':
+          description: No access to the object
+        '500':
+          description: Internal server error
+      security:
+        - ApiKeyAuth: []
+  '/salestxn/{stId}/quote/{quoteId}':
+    get:
+      tags:
+        - quote
+      summary: get the quote using quoteId
+      description: |
+        By passing the stId and quoteId, you can retrieve existing quote
+      operationId: RetrieveQuoteForSalesTransaction
+      produces:
+        - application/json
+      parameters:
+        - name: stId
+          in: path
+          description: sales transaction Id
+          required: true
+          type: integer
+        - name: quoteId
+          in: path
+          description: pass the quote to get the quote
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: quote retrieved
+          schema:
+            $ref: '#/definitions/QuoteResponseDto'
+        '400':
+          description: bad input parameter
+        '401':
+          description: X-Auth-Key is not specified or incorrect
+        '403':
+          description: No access to the object
+        '500':
+          description: Internal server error
+      security:
+        - ApiKeyAuth: []
+    delete:
+      tags:
+        - quote
+      summary: >-
+        cancels the quote using quoteId, corresponding Sales transaction will
+        also be cancelled.
+      description: >
+        By passing the stId and quoteId, you can cancel quote and corresponding
+        sales transaction
+      operationId: CancelQuoteForSalesTransaction
+      produces:
+        - application/json
+      parameters:
+        - name: stId
+          in: path
+          description: sales transaction Id
+          required: true
+          type: integer
+        - name: quoteId
+          in: path
+          description: pass the quote to get the quote
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: quote cancelled
+          schema:
+            $ref: '#/definitions/QuoteSimpleResponseDto'
+        '400':
+          description: bad input parameter
+        '401':
+          description: X-Auth-Key is not specified or incorrect
+        '403':
+          description: No access to the object
+        '500':
+          description: Internal server error
+      security:
+        - ApiKeyAuth: []
+    patch:
+      tags:
+        - quote
+      summary: modifies the quote object
+      description: >
+        By passing the quote request object, stId and quote id, quote can be
+        modified
+      operationId: ModifyQuoteForSalesTransaction
+      produces:
+        - application/json
+      parameters:
+        - name: stId
+          in: path
+          description: sales transaction Id
+          required: true
+          type: integer
+        - name: quoteId
+          in: path
+          description: pass the quote to get the quote
+          required: true
+          type: integer
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/QuoteResponseDto'
+      responses:
+        '200':
+          description: quote modified
+          schema:
+            $ref: '#/definitions/QuoteResponseDto'
+        '400':
+          description: bad input parameter
+        '401':
+          description: X-Auth-Key is not specified or incorrect
+        '403':
+          description: No access to the object
+        '500':
+          description: Internal server error
+      security:
+        - ApiKeyAuth: []
+  '/salestxn/{stId}/quote/{quoteId}/discount':
+    get:
+      tags:
+        - quote - discount
+      summary: retrieves the discounts related to the quote
+      description: |
+        By passing the stId and quoteId, retreive applicable discounts
+      operationId: RetreiveDiscountOptForQuote
+      produces:
+        - application/json
+      parameters:
+        - name: stId
+          in: path
+          description: sales transaction Id
+          required: true
+          type: integer
+        - name: quoteId
+          in: path
+          description: pass the quoteId to get the discounts
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: discounts retrieved
+          schema:
+            $ref: '#/definitions/QuoteDiscountDetailsDto'
+        '400':
+          description: bad input parameter
+        '401':
+          description: X-Auth-Key is not specified or incorrect
+        '403':
+          description: No access to the object
+        '500':
+          description: Internal server error
+      security:
+        - ApiKeyAuth: []
+    post:
+      tags:
+        - quote - discount
+      summary: Adds discounts related to the quote
+      description: >
+        By passing the stId, quoteId and quote discount object, add discounts to
+        quote
+      operationId: AddDiscountOptForQuote
+      produces:
+        - application/json
+      parameters:
+        - name: stId
+          in: path
+          description: sales transaction Id
+          required: true
+          type: integer
+        - name: quoteId
+          in: path
+          description: pass the quoteId to get the discounts
+          required: true
+          type: integer
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/QuoteDiscountDetailsDto'
+      responses:
+        '200':
+          description: discounts added to the quote
+          schema:
+            $ref: '#/definitions/QuoteDiscountDetailsDto'
+        '400':
+          description: bad input parameter
+        '401':
+          description: X-Auth-Key is not specified or incorrect
+        '403':
+          description: No access to the object
+        '500':
+          description: Internal server error
+      security:
+        - ApiKeyAuth: []
+  '/salestxn/{stId}/quote/{quoteId}/tax':
+    get:
+      tags:
+        - quote - tax
+      summary: get the tax using quoteId
+      description: |
+        By passing the stId and quoteId, you can retrieve the tax information
+      operationId: RetreiveTaxForQuote
+      produces:
+        - application/json
+      parameters:
+        - name: stId
+          in: path
+          description: sales transaction Id
+          required: true
+          type: integer
+        - name: quoteId
+          in: path
+          description: pass the quote to get the tax
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: tax retrieved for quote
+          schema:
+            $ref: '#/definitions/QuotePricingDetailsDto'
+        '400':
+          description: bad input parameter
+        '401':
+          description: X-Auth-Key is not specified or incorrect
+        '403':
+          description: No access to the object
+        '500':
+          description: Internal server error
+      security:
+        - ApiKeyAuth: []
+  '/salestxn/{stId}/quote/{quoteId}/document':
+    post:
+      tags:
+        - quote
+      summary: Generate Quote document for the Sales transaction
+      description: |
+        By passing the stId and quoteId, you can generate the quote document
+      operationId: GenerateQuoteDocument
+      produces:
+        - application/json
+      parameters:
+        - name: stId
+          in: path
+          description: sales transaction Id
+          required: true
+          type: integer
+        - name: quoteId
+          in: path
+          description: quote Id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: quote document generated
+          schema:
+            $ref: '#/definitions/QuoteDocDetailsDto'
+        '400':
+          description: bad input parameter
+        '401':
+          description: X-Auth-Key is not specified or incorrect
+        '403':
+          description: No access to the object
+        '500':
+          description: Internal server error
+      security:
+        - ApiKeyAuth: []
+  '/salestxn/{stId}/quote/{quoteId}/confirm':
+    post:
+      tags:
+        - quote
+      summary: confirms the quote of a sales transaction
+      description: |
+        Endpoint to handle quote confirmation
+      operationId: ConfirmQuote
+      produces:
+        - application/json
+      parameters:
+        - name: stId
+          in: path
+          description: sales transaction Id
+          required: true
+          type: integer
+        - name: quoteId
+          in: path
+          description: pass the quote to get the quote
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: quote modified
+          schema:
+            $ref: '#/definitions/QuoteConfirmationDetailsDto'
+        '400':
+          description: bad input parameter
+        '401':
+          description: X-Auth-Key is not specified or incorrect
+        '403':
+          description: No access to the object
+        '500':
+          description: Internal server error
+      security:
+        - ApiKeyAuth: []
+  '/salestxn/{stId}/quote/{quoteId}/deposit':
+    post:
+      tags:
+        - sales transaction - deposit
+      summary: create deposit
+      description: |
+        Endpoint for creating deposit for a sales txn
+      operationId: CreateDepositForSalesTransaction
+      produces:
+        - application/json
+      parameters:
+        - name: stId
+          in: path
+          description: sales transaction Id
+          required: true
+          type: integer
+        - name: quoteId
+          in: path
+          description: quote Id
+          required: true
+          type: integer
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/QuoteDiscountDetailsDto'
+      responses:
+        '200':
+          description: discounts added to the quote
+          schema:
+            $ref: '#/definitions/DepositDetailsDto'
+        '400':
+          description: bad input parameter
+        '401':
+          description: X-Auth-Key is not specified or incorrect
+        '403':
+          description: No access to the object
+        '500':
+          description: Internal server error
+      security:
+        - ApiKeyAuth: []
+securityDefinitions:
+  ApiKeyAuth:
+    description: This should be sent for requests coming from oneAPI
+    type: apiKey
+    name: X-Auth-Key
+    in: header
+definitions:
+  SalesTxnReqDto:
+    type: object
+    required:
+      - commNo
+      - custId
+    properties:
+      commNo:
+        type: string
+        example: '7017480851'
+      custId:
+        type: integer
+        format: int32
+        example: 123
+    description: >-
+      Dto Object that is passed to the API for CRUD operations on the Sales
+      Transaction related to Sales Query
+    example:
+      commNo: '7017480851'
+      custId: 123
+  SalesTxnSimpleResponseDto:
+    type: object
+    properties:
+      stId:
+        type: integer
+        format: int32
+        example: 1
+      custId:
+        type: integer
+        format: int32
+        example: 123
+      createdDate:
+        type: string
+        format: int32
+        example: '12/11/2018 00:12:45'
+      modifiedDate:
+        type: string
+        format: int32
+        example: '13/11/2018 00:12:45'
+      currentStage:
+        type: string
+        example: Sales transaction cancelled
+      currentStatus:
+        type: string
+        example: Cancelled by Customer before quote
+    description: Simple sales transaction Dto
+    example:
+      currentStage: Sales transaction cancelled
+      createdDate: '12/11/2018 00:12:45'
+      currentStatus: Cancelled by Customer before quote
+      custId: 123
+      modifiedDate: '13/11/2018 00:12:45'
+      stId: 1
+  SalesTxnResponseDto:
+    type: object
+    properties:
+      stId:
+        type: integer
+        format: int32
+        example: 1
+      custId:
+        type: integer
+        format: int32
+        example: 123
+      createdDate:
+        type: string
+        format: int32
+        example: '12/11/2018 00:12:45'
+      modifiedDate:
+        type: string
+        format: int32
+        example: '13/11/2018 00:12:45'
+      currentStage:
+        type: string
+        example: Sales transaction Initiated
+      currentStatus:
+        type: string
+        example: Vehicle Data returned successfully
+      vehicleData:
+        $ref: '#/definitions/VehicleDataDto'
+    description: >-
+      Complete sales transaction Dto (should include Sales Transaction, Fleet
+      details, Vehicle Data, Quote, Order, DIP, Taxes, DFS, etc.)
+    example:
+      currentStage: Sales transaction Initiated
+      createdDate: '12/11/2018 00:12:45'
+      currentStatus: Vehicle Data returned successfully
+      vehicleData:
+        vehicleName: A 180 d Automatic
+        vehicleInitialPrice: 32868.47
+        vinNo: W273647619E248762
+        isSimilarVehicle: false
+        vehicleCurr: EUR
+        vehicleEquipmentDetail:
+          bodyType: Coupe
+          engCap: 1.595 cm3
+          upholstery: man-made leather black
+          steering: 'Cruise Control, Multifunction steering wheel'
+          interior:
+            - 'Thermatic, Panaromic sliding sunroof'
+            - 'Thermatic, Panaromic sliding sunroof'
+          vId: 8443163
+          output: 115 KW
+          colour: cosmos black metallic
+          transmission: 7G-TRONIC
+          imageUrl: ./A_180_d_Automatic_Img.jpg
+          design: AMG Bodystyling
+          transmissionType: Manual
+          safetyAndTech:
+            - 'Active Park Assist, ECO start/stop function'
+            - 'Active Park Assist, ECO start/stop function'
+          communication:
+            - 'CD Player, E-Call'
+            - 'CD Player, E-Call'
+          engNo: 38746297
+          intRegYear: 2018
+        vmsNo: 3456386
+      custId: 123
+      modifiedDate: '13/11/2018 00:12:45'
+      stId: 1
+  BasicVehicleDataDto:
+    type: object
+    properties:
+      vmsNo:
+        type: integer
+        example: 3456386
+      vinNo:
+        type: string
+        example: W273647619E248762
+      vehicleModel:
+        type: string
+        example: A 180 d Automatic
+      engNo:
+        type: integer
+        example: 38746297
+    description: Dto object that holds basic vehicle information
+    example:
+      vehicleModel: A 180 d Automatic
+      vinNo: W273647619E248762
+      engNo: 38746297
+      vmsNo: 3456386
+  VehicleDataDto:
+    type: object
+    properties:
+      vmsNo:
+        type: integer
+        example: 3456386
+      vinNo:
+        type: string
+        example: W273647619E248762
+      vehicleName:
+        type: string
+        example: A 180 d Automatic
+      vehicleInitialPrice:
+        type: number
+        example: 32868.47
+      vehicleCurr:
+        type: string
+        example: EUR
+      isSimilarVehicle:
+        type: boolean
+        example: false
+      vehicleEquipmentDetail:
+        $ref: '#/definitions/VEquipmentDetailsDto'
+    description: >-
+      Contains the Vehicle data that is to be returned after sales query is
+      created successfully in STS
+    example:
+      vehicleName: A 180 d Automatic
+      vehicleInitialPrice: 32868.47
+      vinNo: W273647619E248762
+      isSimilarVehicle: false
+      vehicleCurr: EUR
+      vehicleEquipmentDetail:
+        bodyType: Coupe
+        engCap: 1.595 cm3
+        upholstery: man-made leather black
+        steering: 'Cruise Control, Multifunction steering wheel'
+        interior:
+          - 'Thermatic, Panaromic sliding sunroof'
+          - 'Thermatic, Panaromic sliding sunroof'
+        vId: 8443163
+        output: 115 KW
+        colour: cosmos black metallic
+        transmission: 7G-TRONIC
+        imageUrl: ./A_180_d_Automatic_Img.jpg
+        design: AMG Bodystyling
+        transmissionType: Manual
+        safetyAndTech:
+          - 'Active Park Assist, ECO start/stop function'
+          - 'Active Park Assist, ECO start/stop function'
+        communication:
+          - 'CD Player, E-Call'
+          - 'CD Player, E-Call'
+        engNo: 38746297
+        intRegYear: 2018
+      vmsNo: 3456386
+  VEquipmentDetailsDto:
+    type: object
+    properties:
+      vId:
+        type: integer
+        example: 8443163
+      bodyType:
+        type: string
+        example: Coupe
+      output:
+        type: string
+        example: 115 KW
+      transmissionType:
+        type: string
+        example: Manual
+      imageUrl:
+        type: string
+        example: ./A_180_d_Automatic_Img.jpg
+      engNo:
+        type: integer
+        example: 38746297
+      engCap:
+        type: string
+        example: 1.595 cm3
+      colour:
+        type: string
+        example: cosmos black metallic
+      upholstery:
+        type: string
+        example: man-made leather black
+      intRegYear:
+        type: integer
+        example: 2018
+      design:
+        type: string
+        example: AMG Bodystyling
+      transmission:
+        type: string
+        example: 7G-TRONIC
+      steering:
+        type: array
+        example: 'Cruise Control, Multifunction steering wheel'
+        items:
+          format: string
+      safetyAndTech:
+        type: array
+        items:
+          format: string
+          example: 'Active Park Assist, ECO start/stop function'
+      interior:
+        type: array
+        items:
+          format: string
+          example: 'Thermatic, Panaromic sliding sunroof'
+      communication:
+        type: array
+        items:
+          format: string
+          example: 'CD Player, E-Call'
+    description: Dto object for the currently selected vehicle details
+    example:
+      bodyType: Coupe
+      engCap: 1.595 cm3
+      upholstery: man-made leather black
+      steering: 'Cruise Control, Multifunction steering wheel'
+      interior:
+        - 'Thermatic, Panaromic sliding sunroof'
+        - 'Thermatic, Panaromic sliding sunroof'
+      vId: 8443163
+      output: 115 KW
+      colour: cosmos black metallic
+      transmission: 7G-TRONIC
+      imageUrl: ./A_180_d_Automatic_Img.jpg
+      design: AMG Bodystyling
+      transmissionType: Manual
+      safetyAndTech:
+        - 'Active Park Assist, ECO start/stop function'
+        - 'Active Park Assist, ECO start/stop function'
+      communication:
+        - 'CD Player, E-Call'
+        - 'CD Player, E-Call'
+      engNo: 38746297
+      intRegYear: 2018
+  QuoteReqDto:
+    type: object
+    required:
+      - commNo
+      - custId
+      - stId
+    properties:
+      commNo:
+        type: string
+        example: '7017480851'
+      custId:
+        type: integer
+        format: int32
+        example: 123
+      stId:
+        type: integer
+        format: int32
+        example: 48652
+      financingInfo:
+        $ref: '#/definitions/FinProdDetailsDto'
+      fleetDetails:
+        $ref: '#/definitions/FleetDetailsDto'
+    description: >-
+      Dto Object that is passed to the API for CRUD operations on the Sales
+      Transaction related to quote
+    example:
+      commNo: '7017480851'
+      financingInfo:
+        productId: 3454
+        monthlyPayment: 1000
+        productTerm: 12
+      fleetDetails:
+        fleetVolume: 2
+        fleetChannelId: 1
+      custId: 123
+      stId: 48652
+  QuoteSimpleResponseDto:
+    type: object
+    properties:
+      quoteId:
+        type: integer
+        format: int32
+        example: 156363
+      stId:
+        type: integer
+        format: int32
+        example: 1
+      custId:
+        type: integer
+        format: int32
+        example: 123
+      createdDate:
+        type: string
+        format: int32
+        example: '12/11/2018 00:12:45'
+      modifiedDate:
+        type: string
+        format: int32
+        example: '13/11/2018 00:12:45'
+      currentStage:
+        type: string
+        example: Sales transaction cancelled
+      currentStatus:
+        type: string
+        example: Quote cancelled
+    description: Simple Quote Response Dto for deletion/cancellation
+    example:
+      currentStage: Sales transaction cancelled
+      createdDate: '12/11/2018 00:12:45'
+      currentStatus: Quote cancelled
+      custId: 123
+      modifiedDate: '13/11/2018 00:12:45'
+      stId: 1
+      quoteId: 156363
+  QuoteResponseDto:
+    type: object
+    required:
+      - custId
+      - custUniqueId
+      - plannedRetailDate
+      - pricingDetails
+      - quoteApprovedDate
+      - quoteExpiryDate
+      - quoteId
+      - quoteStatus
+      - stId
+      - vehicleInfo
+    properties:
+      quoteId:
+        type: integer
+        format: int32
+        example: 1000801
+      custId:
+        type: integer
+        format: int32
+        example: 123
+      stId:
+        type: integer
+        format: int32
+        example: 48652
+      quoteStatus:
+        type: string
+        example: Processed
+      quoteApprovedDate:
+        type: string
+        format: int32
+        example: '12/11/2018 00:12:45'
+      quoteExpiryDate:
+        type: string
+        format: int32
+        example: '12/11/2018 00:12:45'
+      custUniqueId:
+        type: string
+        example: K284818710P
+      vehicleInfo:
+        $ref: '#/definitions/BasicVehicleDataDto'
+      pricingDetails:
+        $ref: '#/definitions/PricingDetailsDto'
+      discountDetails:
+        $ref: '#/definitions/DiscountDetailsDto'
+      optionalEquipmentDto:
+        $ref: '#/definitions/OptionalEquipmentDto'
+      dealerFittedOptionsDto:
+        $ref: '#/definitions/DealerFittedOptionsDto'
+      plannedRetailDate:
+        type: string
+        format: int32
+        example: '12/11/2018 00:12:45'
+    description: 'Dto object that returns the quote object, after creation'
+    example:
+      optionalEquipmentDto:
+        optionsDetails:
+          string1: value1
+          string2: value2
+      vehicleInfo:
+        vehicleModel: A 180 d Automatic
+        vinNo: W273647619E248762
+        engNo: 38746297
+        vmsNo: 3456386
+      stId: 48652
+      quoteId: 1000801
+      quoteStatus: Processed
+      discountDetails:
+        swtModelCode: AB38472
+        discounts:
+          fleetDiscount: '7236.00'
+          custDiscount: '67.00'
+        discountId: 1
+      custId: 123
+      plannedRetailDate: '12/11/2018 00:12:45'
+      custUniqueId: K284818710P
+      dealerFittedOptionsDto:
+        optionsDetails:
+          do1: value1
+          do2: value2
+      quoteApprovedDate: '12/11/2018 00:12:45'
+      pricingDetails:
+        vatCurr: SGD
+        priceDate: '12/11/2018 00:12:45'
+        vatRate: '1.23'
+        taxes:
+          BaseModelPriceInclVat: '34638.00'
+          TotalExtrasPriceInclVat: '36673.00'
+      quoteExpiryDate: '12/11/2018 00:12:45'
+  OptionalEquipmentDto:
+    type: object
+    properties:
+      optionsDetails:
+        type: array
+        example:
+          string1: value1
+          string2: value2
+        items:
+          $ref: '#/definitions/OptionalEquipmentDto_optionsDetails'
+    description: Dto object for holding optional equipment
+    example:
+      optionsDetails:
+        string1: value1
+        string2: value2
+  DealerFittedOptionsDto:
+    type: object
+    properties:
+      optionsDetails:
+        type: array
+        example:
+          do1: value1
+          do2: value2
+        items:
+          $ref: '#/definitions/OptionalEquipmentDto_optionsDetails'
+    description: Dto object for holding dealer fitted options
+    example:
+      optionsDetails:
+        do1: value1
+        do2: value2
+  QuoteDiscountDetailsDto:
+    type: object
+    properties:
+      quoteId:
+        type: integer
+        example: 1997927
+      discountId:
+        type: integer
+        example: 1
+      swtModelCode:
+        type: string
+        example: AB38472
+      discounts:
+        type: array
+        example:
+          fleetDiscount: '7236.00'
+          custDiscount: '67.00'
+        items:
+          $ref: '#/definitions/QuoteDiscountDetailsDto_discounts'
+    description: Dto object for holding quote related discount details of a vehicle
+    example:
+      swtModelCode: AB38472
+      discounts:
+        fleetDiscount: '7236.00'
+        custDiscount: '67.00'
+      discountId: 1
+      quoteId: 1997927
+  DiscountDetailsDto:
+    type: object
+    properties:
+      discountId:
+        type: integer
+        example: 1
+      swtModelCode:
+        type: string
+        example: AB38472
+      discounts:
+        type: array
+        example:
+          fleetDiscount: '7236.00'
+          custDiscount: '67.00'
+        items:
+          $ref: '#/definitions/QuoteDiscountDetailsDto_discounts'
+    description: Dto object for holding discount details of a vehicle
+    example:
+      swtModelCode: AB38472
+      discounts:
+        fleetDiscount: '7236.00'
+        custDiscount: '67.00'
+      discountId: 1
+  QuotePricingDetailsDto:
+    type: object
+    properties:
+      quoteId:
+        type: integer
+        example: 19394739
+      taxes:
+        type: array
+        example:
+          BaseModelPriceInclVat: '34638.00'
+          TotalExtrasPriceInclVat: '36673.00'
+        items:
+          $ref: '#/definitions/QuotePricingDetailsDto_taxes'
+      vatRate:
+        type: integer
+        format: double
+        example: '1.23'
+      vatCurr:
+        type: string
+        example: SGD
+      priceDate:
+        type: string
+        format: int32
+        example: '12/11/2018 00:12:45'
+    description: Dto object that holds the Quote - Pricing related information
+    example:
+      vatCurr: SGD
+      priceDate: '12/11/2018 00:12:45'
+      vatRate: '1.23'
+      taxes:
+        BaseModelPriceInclVat: '34638.00'
+        TotalExtrasPriceInclVat: '36673.00'
+      quoteId: 19394739
+  PricingDetailsDto:
+    type: object
+    properties:
+      taxes:
+        type: array
+        example:
+          BaseModelPriceInclVat: '34638.00'
+          TotalExtrasPriceInclVat: '36673.00'
+        items:
+          $ref: '#/definitions/QuotePricingDetailsDto_taxes'
+      vatRate:
+        type: integer
+        format: double
+        example: '1.23'
+      vatCurr:
+        type: string
+        example: SGD
+      priceDate:
+        type: string
+        format: int32
+        example: '12/11/2018 00:12:45'
+    description: Dto object that holds the Pricing related information
+    example:
+      vatCurr: SGD
+      priceDate: '12/11/2018 00:12:45'
+      vatRate: '1.23'
+      taxes:
+        BaseModelPriceInclVat: '34638.00'
+        TotalExtrasPriceInclVat: '36673.00'
+  FleetDetailsDto:
+    type: object
+    required:
+      - fleetChannelId
+      - fleetVolume
+    properties:
+      fleetChannelId:
+        type: integer
+        format: int32
+        example: 1
+      fleetVolume:
+        type: integer
+        format: int32
+        example: 2
+    description: Dto object for holding the fleet details
+    example:
+      fleetVolume: 2
+      fleetChannelId: 1
+  FinProdDetailsDto:
+    type: object
+    required:
+      - monthlyPayment
+      - productId
+      - productTerm
+    properties:
+      productId:
+        type: integer
+        format: int32
+        example: 3454
+      productTerm:
+        type: integer
+        format: int32
+        example: 12
+      monthlyPayment:
+        type: integer
+        format: float
+        example: 1000
+    description: Dto object for holding the financial product related information
+    example:
+      productId: 3454
+      monthlyPayment: 1000
+      productTerm: 12
+  QuoteDocDetailsDto:
+    type: object
+    properties:
+      stId:
+        type: integer
+        format: int32
+        example: 123
+      quoteId:
+        type: integer
+        format: int32
+        example: 4524
+      documentId:
+        type: integer
+        format: int32
+        example: 474674
+      documentUrl:
+        type: string
+        example: 'www.dropbox.com/#7462djfhj#4'
+    description: Dto object holding the quote document
+    example:
+      documentUrl: 'www.dropbox.com/#7462djfhj#4'
+      stId: 123
+      documentId: 474674
+      quoteId: 4524
+  QuoteConfirmationDetailsDto:
+    type: object
+    properties:
+      stId:
+        type: integer
+        format: int32
+        example: 123
+      quoteId:
+        type: integer
+        format: int32
+        example: 4524
+      custId:
+        type: integer
+        example: 1231
+      documentId:
+        type: integer
+        format: int32
+        example: 474674
+      documentUrl:
+        type: string
+        example: 'www.dropbox.com/#7462djfhj#4'
+      currentStage:
+        type: string
+        example: Quote
+      currentStatus:
+        type: string
+        example: Quote confirmed
+    description: Dto object holding the quote confirmation
+    example:
+      currentStage: Quote
+      currentStatus: Quote confirmed
+      documentUrl: 'www.dropbox.com/#7462djfhj#4'
+      custId: 1231
+      stId: 123
+      documentId: 474674
+      quoteId: 4524
+  DepositDetailsDto:
+    type: object
+    properties:
+      stId:
+        type: integer
+        format: int32
+        example: 123
+      quoteId:
+        type: integer
+        format: int32
+        example: 4524
+      custId:
+        type: integer
+        example: 1231
+      depositId:
+        type: integer
+        example: 2424
+    description: Dto object holding the deposit details
+    example:
+      depositId: 2424
+      custId: 1231
+      stId: 123
+      quoteId: 4524
+  STS.SalesTransaction:
+    type: object
+    required:
+      - CreatedDate
+      - CustId
+      - ModifiedDate
+      - StId
+      - StsCurrentStage
+      - StsCurrentStatus
+    properties:
+      StId:
+        type: integer
+        format: int32
+        example: 1
+      QuoteId:
+        type: string
+        example: '7017480851'
+      CustId:
+        type: integer
+        format: int32
+        example: 123
+      CreatedDate:
+        type: string
+        format: int32
+        example: '12/11/2018 00:12:45'
+      ModifiedDate:
+        type: string
+        format: int32
+        example: '13/11/2018 00:12:45'
+      StsCurrentStage:
+        type: integer
+        format: int32
+        example: 1
+      StsCurrentStatus:
+        type: integer
+        format: int32
+        example: 1
+    description: Underlying DB Object for Sales Txns
+  STS.SalesTransactionStage:
+    type: object
+    required:
+      - StsStage
+      - StsStageDesc
+    properties:
+      StsStage:
+        type: integer
+        format: int32
+        example: 1
+      StsStageDesc:
+        type: string
+        example: Sales Query
+    description: Underlying DB object that stores the stages of a sales transaction
+  STS.SalesTransactionStatus:
+    type: object
+    required:
+      - StsStatus
+      - StsStatusDesc
+    properties:
+      StsStatus:
+        type: integer
+        format: int32
+        example: 1
+      StsStatusDesc:
+        type: string
+        example: Sales Transaction Created
+    description: Underlying DB object that stores the statuses of a sales transaction
+  inline_response_201:
+    properties:
+      SalesTxnResponseDto:
+        $ref: '#/definitions/SalesTxnResponseDto'
+    example:
+      SalesTxnResponseDto:
+        currentStage: Sales transaction Initiated
+        createdDate: '12/11/2018 00:12:45'
+        currentStatus: Vehicle Data returned successfully
+        vehicleData:
+          vehicleName: A 180 d Automatic
+          vehicleInitialPrice: 32868.47
+          vinNo: W273647619E248762
+          isSimilarVehicle: false
+          vehicleCurr: EUR
+          vehicleEquipmentDetail:
+            bodyType: Coupe
+            engCap: 1.595 cm3
+            upholstery: man-made leather black
+            steering: 'Cruise Control, Multifunction steering wheel'
+            interior:
+              - 'Thermatic, Panaromic sliding sunroof'
+              - 'Thermatic, Panaromic sliding sunroof'
+            vId: 8443163
+            output: 115 KW
+            colour: cosmos black metallic
+            transmission: 7G-TRONIC
+            imageUrl: ./A_180_d_Automatic_Img.jpg
+            design: AMG Bodystyling
+            transmissionType: Manual
+            safetyAndTech:
+              - 'Active Park Assist, ECO start/stop function'
+              - 'Active Park Assist, ECO start/stop function'
+            communication:
+              - 'CD Player, E-Call'
+              - 'CD Player, E-Call'
+            engNo: 38746297
+            intRegYear: 2018
+          vmsNo: 3456386
+        custId: 123
+        modifiedDate: '13/11/2018 00:12:45'
+        stId: 1
+  inline_response_201_1:
+    properties:
+      QuoteResponseDto:
+        $ref: '#/definitions/QuoteResponseDto'
+    example:
+      QuoteResponseDto:
+        optionalEquipmentDto:
+          optionsDetails:
+            string1: value1
+            string2: value2
+        vehicleInfo:
+          vehicleModel: A 180 d Automatic
+          vinNo: W273647619E248762
+          engNo: 38746297
+          vmsNo: 3456386
+        stId: 48652
+        quoteId: 1000801
+        quoteStatus: Processed
+        discountDetails:
+          swtModelCode: AB38472
+          discounts:
+            fleetDiscount: '7236.00'
+            custDiscount: '67.00'
+          discountId: 1
+        custId: 123
+        plannedRetailDate: '12/11/2018 00:12:45'
+        custUniqueId: K284818710P
+        dealerFittedOptionsDto:
+          optionsDetails:
+            do1: value1
+            do2: value2
+        quoteApprovedDate: '12/11/2018 00:12:45'
+        pricingDetails:
+          vatCurr: SGD
+          priceDate: '12/11/2018 00:12:45'
+          vatRate: '1.23'
+          taxes:
+            BaseModelPriceInclVat: '34638.00'
+            TotalExtrasPriceInclVat: '36673.00'
+        quoteExpiryDate: '12/11/2018 00:12:45'
+  OptionalEquipmentDto_optionsDetails:
+    properties:
+      optionType:
+        type: string
+      optionDesc:
+        type: string
+  QuoteDiscountDetailsDto_discounts:
+    properties:
+      discountType:
+        type: string
+      discountValue:
+        type: number
+        format: double
+  QuotePricingDetailsDto_taxes:
+    properties:
+      taxType:
+        type: string
+      taxValue:
+        type: number
+        format: double
+responses:
+  BadInputParameter:
+    description: bad input parameter
+  UnauthorizedError:
+    description: X-Auth-Key is not specified or incorrect
+  ObjectAccessError:
+    description: No access to the object
+  InternalServerError:
+    description: Internal server error
